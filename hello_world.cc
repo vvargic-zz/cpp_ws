@@ -1,4 +1,5 @@
 #include <initializer_list>
+#include <stdexcept>
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
@@ -15,6 +16,7 @@ class Vector
     Vector &operator=(const Vector &copycat); // copy assignment
     void Push_back(int element);
     size_t Size();
+    int at(unsigned int index);
     void Print_all(void);
     ~Vector();
 
@@ -103,6 +105,7 @@ Vector &Vector::operator=(const Vector &copycat)
 void Vector::Push_back(int element)
 {
     if ((elements_real - elements_user) < 1) {
+        /* Double the size each time we hit the boundary */
         int *new_memp = (int *)realloc(mem_p, elements_real * sizeof(int) * 2);
         if (!new_memp) {
             cout << "Failed to allocate memory for element: " << element << "\n";
@@ -126,11 +129,20 @@ size_t Vector::Size()
     return elements_user;
 }
 
+int Vector::at(unsigned int index)
+{
+    if (index >= elements_user) {
+        throw invalid_argument("Index out of bounds!\n");
+    }
+
+    return *(mem_p + index);
+}
+
 
 void Vector::Print_all(void)
 {
     for (int i = 0; i < elements_real; i++) {
-        cout << "Element " << i << ": " << mem_p[i] << "\n";
+        cout << "\tElement " << i << ": " << mem_p[i] << "\n";
     }
 }
 
@@ -148,9 +160,9 @@ Vector::~Vector()
 
 int main()
 {
-    cout << "\nInitializing vector(3)...\n";
+    cout << "\nInitializing vector(3)\n";
     Vector bla(3);
-    cout << "Vector's size is: " << bla.Size() << "\n";
+    cout << "Vector size is: " << bla.Size() << "\n";
 
     cout << "\nPushing 1,2,3,4,5 to vector...\n";
     bla.Push_back(1);
@@ -159,20 +171,23 @@ int main()
     bla.Push_back(4);
     bla.Push_back(5);
     cout << "Vector size is: " << bla.Size() << "\n";
-    cout << "Priting all the elements of vector, hidden ones included...\n";
+    cout << "Priting all the elements of vector, hidden ones included:\n";
     bla.Print_all();
 
-    bla.Push_back(5);
-    bla.Push_back(5);
-    bla.Push_back(5);
-    bla.Push_back(5);
-    bla.Print_all();
 
     cout << "\nInitializing new vector with copy contructor.\n";
     Vector bla2=bla;
     cout << "New vector's size is: " << bla2.Size() << "\n";
     cout << "Printing all elements of new vector...\n";
     bla2.Print_all();
+
+    cout << "Vector2 at 2: " << bla2.at(2) << "\n";
+    cout << "Trying to print Vector2 at 32.\n";
+    try {
+        cout << "Vector2 at 32: " << bla2.at(32) << "\n";
+    } catch (const std::invalid_argument& e) {
+        cout << "Exception catched: " << e.what();
+    }
 
     return 0;
 }
