@@ -1,14 +1,14 @@
-CC=g++
-CFLAGS=-I. -g -O0
+CXX = g++
+CXXFLAGS = -std=c++11 -I.
 DEPS =
 OBJ = hello_world.o
 BIN = hello_world
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
 $(BIN): $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CXX) -o $@ $^ $(CXXFLAGS)
 
 .PHONY: clean
 

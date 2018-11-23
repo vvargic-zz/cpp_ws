@@ -12,11 +12,13 @@ class Vector
   public:
     Vector(void);
     Vector(const unsigned int);
-    Vector(const Vector &copycat);            // copy contructor
-    Vector &operator=(const Vector &copycat); // copy assignment
-    void Push_back(int element);
+    Vector(std::initializer_list<int>);
+    Vector(const Vector&);            // copy contructor
+    Vector &operator=(const Vector&); // copy assignment
+    int at_change(unsigned int, unsigned int);
+    void Push_back(int);
     size_t Size();
-    int at(unsigned int index);
+    int at(unsigned int);
     void Print_all(void);
     ~Vector();
 
@@ -65,6 +67,28 @@ Vector::Vector(unsigned int user_size)
 }
 
 
+Vector::Vector(std::initializer_list<int> elements)
+{
+    const int *it;
+    int j = 0;
+    elements_user = 0;
+
+    if (elements.size() < 20) {
+        mem_p = (int *)calloc(20, sizeof(int));
+        elements_real = 20;
+    } else {
+        mem_p = (int *)calloc(elements.size(), sizeof(int));
+        elements_real = elements.size();
+    }
+
+    for (it = elements.begin(); it != elements.end(); it++) {
+        *(mem_p + j) = *it;
+        elements_user++;
+        j++;
+    }
+}
+
+
 Vector::Vector(const Vector &copycat)
 {
     if (copycat.mem_p == NULL) {
@@ -94,11 +118,21 @@ Vector::Vector(const Vector &copycat)
 
 Vector &Vector::operator=(const Vector &copycat)
 {
-/*    if (copycat.mem_p == NULL || copycat.elements_n == 0) {
-        cout << "Trying to copy from uninitialized vector\n";
-        return;
+    if (this == &copycat) {
+        cout << "Trying to copy yourself\n";
+        return *this;
     }
-*/
+
+    if (elements_real < copycat.elements_user) {
+        cout << "Need to reallocate vector, TODO\n";
+    }
+
+    for (int i = 0; i < copycat.elements_user; i++) {
+        mem_p[i] = copycat.mem_p[i];
+    }
+
+    elements_user = copycat.elements_user;
+
 }
 
 
@@ -138,10 +172,15 @@ int Vector::at(unsigned int index)
     return *(mem_p + index);
 }
 
+int Vector::at_change(unsigned int index, unsigned int value)
+{
+    *(mem_p + index) = value;
+}
+
 
 void Vector::Print_all(void)
 {
-    for (int i = 0; i < elements_real; i++) {
+    for (int i = 0; i < elements_user; i++) {
         cout << "\tElement " << i << ": " << mem_p[i] << "\n";
     }
 }
@@ -161,25 +200,35 @@ Vector::~Vector()
 int main()
 {
     cout << "\nInitializing vector(3)\n";
-    Vector bla(3);
+    Vector bla({1,2,3});
     cout << "Vector size is: " << bla.Size() << "\n";
 
-    cout << "\nPushing 1,2,3,4,5 to vector...\n";
-    bla.Push_back(1);
-    bla.Push_back(2);
-    bla.Push_back(3);
+    cout << "\nPushing 4,5 to vector...\n";
     bla.Push_back(4);
     bla.Push_back(5);
-    cout << "Vector size is: " << bla.Size() << "\n";
-    cout << "Priting all the elements of vector, hidden ones included:\n";
+    cout << "Vector size is: " << bla.Size() << ", expected 5\n";
+
+    cout << "Trying copy constructor\n";
+    Vector bla2 = bla;
+    cout << "Copied vector size is " << bla2.Size() << "\n";
+
+    cout << "Trying self assignment...\n";
+    bla = bla;
+
+    cout << "Trying copy assignment with default constructor\n";
+    Vector bla3;
+    bla3 = bla;
+    cout << "Vector3 size is " << bla3.Size() << "\n";
+    cout << "Vector3 elements are:\n";
+    bla3.Print_all();
+    cout << "Vector elements are:\n";
     bla.Print_all();
 
-
-    cout << "\nInitializing new vector with copy contructor.\n";
-    Vector bla2=bla;
-    cout << "New vector's size is: " << bla2.Size() << "\n";
-    cout << "Printing all elements of new vector...\n";
-    bla2.Print_all();
+    bla.at_change(1, 13);
+    cout << "Vector elements are:\n";
+    bla.Print_all();
+    cout << "Vector3 elements are:\n";
+    bla3.Print_all();
 
     cout << "Vector2 at 2: " << bla2.at(2) << "\n";
     cout << "Trying to print Vector2 at 32.\n";
